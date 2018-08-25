@@ -1,0 +1,19 @@
+#!/bin/sh
+# Make snapshots for lvm devices.
+set -e
+
+source /etc/mksnaps.conf
+
+date_string=$(date +%Y%m%d)
+for (( i = 0; i < ${#subvol_names[@]}; i++ )); do
+    subvol_name=${subvol_names[i]}
+    if [[ ! -e "/dev/$vol_group/$subvol_name" ]]; then continue; fi
+    snap_name="$subvol_name-$date_string"
+    num=0
+    while [[ -e "/dev/$vol_group/$snap_name" ]]; do
+        num=$(( num+1 ))
+        snap_name="$subvol_name-$date_string-$num"
+    done
+    snap_size=${snap_sizes[i]}
+    lvcreate -L"$snap_size" -n "$snap_name" -s "$vol_group/$subvol_name"
+done

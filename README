@@ -1,0 +1,9 @@
+## INSTALLATION
+1) If using btrfs, edit your fstab to mount the btrfs partition you want to backup.
+(If you choose a mount point different than /mnt/vol edit /etc/make-snapshots-target.conf to match.)
+2) Build and install the package.
+3) Enable the appropriate service:
+  systemctl enable mk-btrfs-snapshots
+  systemctl enable mk-lvm-snapshots
+4) Edit /boot/grub/make-snapshots.cfg and edit /boot/grub/custom.cfg to source
+/boot/grub/make-snapshots.cfg.

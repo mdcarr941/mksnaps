@@ -1,0 +1,30 @@
+#!/bin/bash
+# To use this script you need to add the btrfs partition to fstab and set
+# $mnt_dir in this script to location it is to be mounted on.
+set -e
+
+source /etc/mksnaps.conf
+
+wasnt_mounted=0
+if ! findmnt "$mnt_dir" > /dev/null; then
+    wasnt_mounted=1
+    mount "$mnt_dir"
+fi
+cd "$mnt_dir"
+
+date_string=$(date +%Y%m%d)
+for subvol_name in "${subvol_names[@]}"; do
+    if [[ ! -e "$subvol_name" ]]; then continue; fi
+    snap_name="$subvol_name-$date_string"
+    num=0
+    while [[ -e "$snap_name" ]]; do
+        num=$(( num+1 ))
+        snap_name="$subvol_name-$date_string-$num"
+    done
+    btrfs subvolume snapshot -r "$subvol_name" "$snap_name"
+done
+
+if [[ $wasnt_mounted -eq 1 ]]; then
+    cd ..
+    umount "$mnt_dir"
+fi
